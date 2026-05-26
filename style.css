@@ -625,6 +625,11 @@ body {
     border-color: var(--accent-indigo);
 }
 
+.custom-select option {
+    background-color: #111625;
+    color: #f3f4f6;
+}
+
 .pos-categories {
     display: flex;
     gap: 8px;

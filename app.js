@@ -865,6 +865,41 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     });
 
+    // Close & Print Receipt Modal Controllers
+    const closeReceiptModal = () => {
+        document.getElementById('receipt-modal').classList.remove('active');
+    };
+    document.getElementById('btn-close-receipt').addEventListener('click', closeReceiptModal);
+    document.getElementById('btn-done-receipt').addEventListener('click', closeReceiptModal);
+
+    document.getElementById('btn-print-receipt').addEventListener('click', () => {
+        const printContent = document.getElementById('printable-receipt').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<html><head><title>Print Receipt</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('body { font-family: monospace; padding: 20px; color: #000; background: #fff; }');
+        printWindow.document.write('.receipt-header { text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 10px; }');
+        printWindow.document.write('.receipt-divider { border-top: 1px dashed #000; margin: 10px 0; }');
+        printWindow.document.write('.receipt-detail-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }');
+        printWindow.document.write('.receipt-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }');
+        printWindow.document.write('.receipt-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px; }');
+        printWindow.document.write('.receipt-table td { padding: 4px; }');
+        printWindow.document.write('.receipt-summary { margin-top: 10px; font-size: 12px; }');
+        printWindow.document.write('.receipt-summary-row { display: flex; justify-content: space-between; margin-bottom: 4px; }');
+        printWindow.document.write('.receipt-summary-row.bold { font-weight: bold; border-top: 1px dashed #000; padding-top: 4px; }');
+        printWindow.document.write('.receipt-footer { text-align: center; font-size: 10px; margin-top: 20px; }');
+        printWindow.document.write('</style></head><body>');
+        printWindow.document.write(printContent);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        // Wait briefly for content to render, then print and close tab
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    });
+
 
     // ----------------------------------------------------
     // 7. UDHAARI / DUES TRACKER LEDGER ENGINE
