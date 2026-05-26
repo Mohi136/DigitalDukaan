@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalDukaan - Small Business Digitalization Platform</title>
+    <!-- Lucide Icons for clean sleek SVG indicators -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for gorgeous dashboard graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- MULTI-TENANT LOCAL AUTHENTICATION SCREEN OVERLAY -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">DD</div>
+                <h1 class="auth-logo-text">DigitalDukaan</h1>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="btn-tab-login">Login</button>
+                <button class="auth-tab-btn" id="btn-tab-register">Register Shop</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="form-login">
+                <div class="form-group">
+                    <label for="login-username">Merchant / Owner Name</label>
+                    <input type="text" id="login-username" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required placeholder="Owner Name">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="auth-btn">
+                    <i data-lucide="log-in" style="width: 16px; height: 16px;"></i>
+                    <span>Log Into My Dukaan</span>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form hidden" id="form-register">
+                <div class="form-group">
+                    <label for="reg-shopname">Shop Name (Dukaan Name)</label>
+                    <input type="text" id="reg-shopname" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required placeholder="e.g. Mohit Trading">
+                </div>
+                <div class="form-group-grid">
+                    <div class="form-group">
+                        <label for="reg-username">Owner Name</label>
+                        <input type="text" id="reg-username" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required placeholder="Owner Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">Mobile No. (SMS Outbound)</label>
+                        <input type="text" id="reg-phone" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required maxlength="10" placeholder="10-digit number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Create Password</label>
+                    <input type="password" id="reg-password" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required minlength="4" placeholder="Min 4 characters">
+                </div>
+                <button type="submit" class="auth-btn" style="background: linear-gradient(135deg, var(--accent-emerald), #059669);">
+                    <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+                    <span>Create My DigitalDukaan</span>
+                </button>
+            </form>
+
+            <div class="auth-demo-hint">
+                💡 <strong>Demo Creds:</strong> Owner: <code>admin</code> | Password: <code>admin</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">DD</div>
+                <h1 class="logo-text">DigitalDukaan</h1>
+            </div>
+            
+            <ul class="nav-links">
+                <li>
+                    <a class="nav-item active" data-tab="dashboard">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-item" data-tab="billing">
+                        <i data-lucide="receipt"></i>
+                        <span>New Bill (POS)</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-item" data-tab="inventory">
+                        <i data-lucide="package"></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-item" data-tab="udhaari">
+                        <i data-lucide="notebook"></i>
+                        <span>Udhaari Tracker</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="merchant-profile-wrapper">
+                    <div class="merchant-avatar" id="sidebar-avatar">O</div>
+                    <div class="merchant-info">
+                        <div class="merchant-name" id="sidebar-merchant-name">Owner Name</div>
+                        <div class="merchant-tag" id="sidebar-shop-name">Dukaan Name</div>
+                    </div>
+                </div>
+                <button class="logout-icon-btn" id="btn-logout" title="Log Out">
+                    <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="page-title-container">
+                    <h2 class="page-title" id="page-current-title">Dashboard Overview</h2>
+                    <p class="page-subtitle" id="page-current-subtitle">Real-time statistics & business diagnostics</p>
+                </div>
+                <div class="header-actions">
+                    <div class="stats-pill">
+                        <span class="stats-pill-dot"></span>
+                        <span id="header-status-text">DigitalDukaan Live</span>
+                    </div>
+                    <div class="stats-pill" style="border-color: var(--accent-emerald); background: var(--accent-emerald-glow); color: var(--accent-emerald); font-weight:700;">
+                        <i data-lucide="trending-up" style="width: 16px; height: 16px;"></i>
+                        <span>Today's Profit: <strong><span id="header-today-profit">₹0.00</span></strong></span>
+                    </div>
+                    <div class="stats-pill" style="font-size: 13px;">
+                        <i data-lucide="banknote" style="color: var(--accent-saffron); width: 16px; height: 16px;"></i>
+                        <span>INR (₹)</span>
+                    </div>
+                    <button class="btn-primary" id="btn-quick-sell">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Quick Invoice</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Tab Content -->
+            <div class="content-body">
+                
+                <!-- 1. DASHBOARD OVERVIEW TAB -->
+                <section id="dashboard-tab" class="tab-content active">
+                    <!-- Key Metrics Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card indigo">
+                            <div class="metric-info">
+                                <h4>Today's Sales</h4>
+                                <div class="metric-value" id="dash-revenue">₹0.00</div>
+                                <div class="metric-trend up">
+                                    <i data-lucide="trending-up"></i>
+                                    <span>Gross checkout volumes</span>
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i data-lucide="indian-rupee"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card emerald">
+                            <div class="metric-info">
+                                <h4>Today's Net Profit</h4>
+                                <div class="metric-value" id="dash-profit">₹0.00</div>
+                                <div class="metric-trend up">
+                                    <i data-lucide="coins"></i>
+                                    <span>Direct cash/ledger margins</span>
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i data-lucide="sparkles"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card saffron">
+                            <div class="metric-info">
+                                <h4>Active Inventory</h4>
+                                <div class="metric-value" id="dash-inventory">0 Items</div>
+                                <div class="metric-trend neutral" id="dash-lowstock-alert">
+                                    <i data-lucide="alert-triangle"></i>
+                                    <span>0 low stock items</span>
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i data-lucide="boxes"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card rose">
+                            <div class="metric-info">
+                                <h4>Outstanding Dues</h4>
+                                <div class="metric-value" id="dash-outstanding-dues">₹0.00</div>
+                                <div class="metric-trend down" style="color: var(--accent-rose);">
+                                    <i data-lucide="book-open"></i>
+                                    <span>Total pending credit balances</span>
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i data-lucide="user-minus"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Data Visualizations -->
+                    <div class="dashboard-grid">
+                        <!-- Sales Chart Glass Card -->
+                        <div class="glass-card">
+                            <div class="glass-card-header">
+                                <h3 class="glass-card-title">
+                                    <i data-lucide="activity" style="color: var(--accent-indigo);"></i>
+                                    <span>Sales Revenue Trends</span>
+                                </h3>
+                                <div class="stats-pill" style="font-size: 11px;">
+                                    <span>Last 7 Days (Bar view)</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Right column elements -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            
+                            <!-- Customer Dues Tracker Dashboard Card (NEW!) -->
+                            <div class="glass-card" style="padding: 20px;">
+                                <div class="glass-card-header" style="margin-bottom: 12px;">
+                                    <h3 class="glass-card-title">
+                                        <i data-lucide="user-minus" style="color: var(--accent-rose);"></i>
+                                        <span>Customer Dues Tracker</span>
+                                    </h3>
+                                    <div class="stats-pill" style="font-size: 11px; border-color: rgba(244, 63, 94, 0.3); color: var(--accent-rose); background: var(--accent-rose-glow);">
+                                        <span>Ledger totals</span>
+                                    </div>
+                                </div>
+                                <div class="transaction-list" id="dashboard-dues-list" style="max-height: 140px;">
+                                    <!-- Loaded dynamically with cross icons -->
+                                </div>
+                            </div>
+
+                            <!-- Top Products Card -->
+                            <div class="glass-card" style="padding: 20px;">
+                                <div class="glass-card-header" style="margin-bottom: 12px;">
+                                    <h3 class="glass-card-title">
+                                        <i data-lucide="award" style="color: var(--accent-saffron);"></i>
+                                        <span>Top Products by Sales</span>
+                                    </h3>
+                                </div>
+                                <div class="transaction-list" id="dashboard-top-products" style="max-height: 120px;">
+                                    <!-- Loaded dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Recent Invoices Card -->
+                            <div class="glass-card" style="padding: 20px;">
+                                <div class="glass-card-header" style="margin-bottom: 12px;">
+                                    <h3 class="glass-card-title">
+                                        <i data-lucide="history" style="color: var(--accent-emerald);"></i>
+                                        <span>Recent Invoices</span>
+                                    </h3>
+                                </div>
+                                <div class="transaction-list" id="dashboard-tx-list" style="max-height: 140px;">
+                                    <!-- Preloaded/Generated Transactions go here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. BILLING POS TAB -->
+                <section id="billing-tab" class="tab-content">
+                    <div class="billing-layout">
+                        <!-- POS Products Catalog -->
+                        <div class="pos-products">
+                            <div class="pos-search-bar">
+                                <div class="search-input-wrapper">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="pos-product-search" class="custom-input" placeholder="Search product name, barcode or brand...">
+                                </div>
+                                <select id="pos-category-select" class="custom-select">
+                                    <option value="all">All Categories</option>
+                                </select>
+                            </div>
+
+                            <div class="pos-categories" id="pos-categories-chips">
+                                <!-- Dynamic category chips go here -->
+                            </div>
+
+                            <!-- Products Grid -->
+                            <div class="pos-items-grid" id="pos-items-grid">
+                                <!-- Loaded items dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Billing Cart Glass Panel -->
+                        <div class="glass-card pos-cart-panel">
+                            <div class="glass-card-header" style="margin-bottom: 10px;">
+                                <h3 class="glass-card-title">
+                                    <i data-lucide="shopping-cart" style="color: var(--accent-saffron);"></i>
+                                    <span>Billing Cart</span>
+                                </h3>
+                                <button class="btn-secondary" id="btn-clear-cart" style="padding: 4px 8px; font-size: 11px;">
+                                    Clear
+                                </button>
+                            </div>
+
+                            <!-- Cart Items list -->
+                            <div class="cart-items-section" id="cart-items-section">
+                                <!-- Cart rows go here -->
+                            </div>
+
+                            <!-- Payment Mode Selector -->
+                            <div style="padding: 12px 0; border-top: 1px solid var(--border-color);">
+                                <label style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 700;">Payment Status / Mode</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px;">
+                                    <button type="button" class="btn-secondary active-payment" id="btn-pay-cash" style="padding: 8px; font-size: 11px; justify-content: center; width: 100%;">
+                                        <i data-lucide="banknote" style="width: 13px; height: 13px; margin-right: 4px;"></i>Cash (Paid)
+                                    </button>
+                                    <button type="button" class="btn-secondary" id="btn-pay-online" style="padding: 8px; font-size: 11px; justify-content: center; width: 100%;">
+                                        <i data-lucide="smartphone" style="width: 13px; height: 13px; margin-right: 4px;"></i>Online (Paid)
+                                    </button>
+                                    <button type="button" class="btn-secondary" id="btn-pay-udhaar" style="padding: 8px; font-size: 11px; justify-content: center; width: 100%; border-color: rgba(244, 63, 94, 0.3);">
+                                        <i data-lucide="book-open" style="width: 13px; height: 13px; margin-right: 4px; color: var(--accent-rose);"></i>Udhaar (Dues)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Customer Form -->
+                            <div class="cart-customer-section">
+                                <div class="cart-form-grid">
+                                    <div class="cart-field">
+                                        <label for="customer-name">Customer Name <span id="req-star-name" style="color:var(--accent-rose); display:none;">*</span></label>
+                                        <input type="text" id="customer-name" placeholder="Optional Name">
+                                    </div>
+                                    <div class="cart-field">
+                                        <label for="customer-phone">Mobile Number <span id="req-star-phone" style="color:var(--accent-rose); display:none;">*</span></label>
+                                        <input type="text" id="customer-phone" placeholder="e.g. 9876543210" maxlength="10">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Calculations Invoice breakdown -->
+                            <div class="cart-summary-section">
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <span id="cart-subtotal">₹0.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>CGST (9.0%)</span>
+                                    <span id="cart-cgst">₹0.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>SGST (9.0%)</span>
+                                    <span id="cart-sgst">₹0.00</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Grand Total</span>
+                                    <span class="price-val" id="cart-total">₹0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="cart-checkout-actions">
+                                <button class="btn-primary checkout-btn" id="btn-checkout">
+                                    <i data-lucide="check-square"></i>
+                                    <span>Complete Bill & Send SMS Alert</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. INVENTORY MANAGEMENT TAB -->
+                <section id="inventory-tab" class="tab-content">
+                    <div class="glass-card">
+                        <!-- Controls for searching and adding -->
+                        <div class="inventory-actions">
+                            <div style="display: flex; gap: 12px; flex-grow: 1; max-width: 500px;">
+                                <div class="search-input-wrapper" style="flex-grow: 1;">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="inventory-search" class="custom-input" placeholder="Search inventory list...">
+                                </div>
+                                <select id="inventory-category-filter" class="custom-select">
+                                    <option value="all">All Categories</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" id="btn-add-product">
+                                <i data-lucide="plus"></i>
+                                <span>Add New Product</span>
+                            </button>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Stock Level</th>
+                                        <th>Purchase Price (₹)</th>
+                                        <th>Selling Price (₹)</th>
+                                        <th>Alert Min</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body">
+                                    <!-- Dynamic rows loaded by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. UDHAARI / DUES TRACKER TAB (Option A) -->
+                <section id="udhaari-tab" class="tab-content">
+                    <div class="sms-grid">
+                        
+                        <!-- Udhaari Ledger Sheet -->
+                        <div class="glass-card">
+                            <div class="glass-card-header">
+                                <h3 class="glass-card-title">
+                                    <i data-lucide="notebook" style="color: var(--accent-rose);"></i>
+                                    <span>Customer Udhaari Ledger</span>
+                                </h3>
+                                <div class="stats-pill" style="color: var(--accent-rose); background: var(--accent-rose-glow); border-color: rgba(244, 63, 94, 0.25);">
+                                    <span>Outstanding Dues: <strong id="udhaari-total-due">₹0.00</strong></span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; margin-bottom: 16px; max-width: 450px;">
+                                <div class="search-input-wrapper" style="flex-grow: 1;">
+                                    <i data-lucide="search"></i>
+                                    <input type="text" id="udhaari-search" class="custom-input" placeholder="Search customer by name or mobile...">
+                                </div>
+                            </div>
+
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="custom-table" style="font-size: 13px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer Name</th>
+                                            <th>Mobile No.</th>
+                                            <th>Outstanding (₹)</th>
+                                            <th>Last Activity</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="udhaari-table-body">
+                                        <!-- Loaded dynamically in app.js with a cross column -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Udhaari Actions & Payments panel -->
+                        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                            <div>
+                                <div class="glass-card-header">
+                                    <h3 class="glass-card-title">
+                                        <i data-lucide="credit-card" style="color: var(--accent-emerald);"></i>
+                                        <span>Udhaari Actions & Payments</span>
+                                    </h3>
+                                </div>
+                                <p style="font-size: 12px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;">
+                                    Manage outstanding store credits, register customer payments, and track store dues balances in real-time.
+                                </p>
+                                
+                                <div class="cart-summary-section" style="background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.15); margin-bottom: 20px;">
+                                    <h4 style="font-size: 13px; color: var(--accent-rose); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                        <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                                        <span id="udhaari-selected-name">No Customer Selected</span>
+                                    </h4>
+                                    <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;" id="udhaari-selected-info">
+                                        Please select "Manage" on any customer in the ledger table to register cash/online credit payments.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px;" id="udhaari-actions-block">
+                                <!-- Render buttons dynamically when customer chosen -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL 1: POS PRINTABLE INVOICE RECEIPT OVERLAY -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="check-check" style="color: var(--accent-emerald);"></i>
+                    <span>Sale Completed Successfully</span>
+                </h3>
+                <span style="cursor: pointer; color: var(--text-muted);" id="btn-close-receipt"><i data-lucide="x"></i></span>
+            </div>
+            <div class="modal-body" style="background: #111;">
+                <!-- Printable Receipt -->
+                <div class="receipt-container" id="printable-receipt">
+                    <!-- Loaded dynamically in app.js -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-print-receipt">
+                    <i data-lucide="printer"></i>
+                    <span>Print Bill</span>
+                </button>
+                <button class="btn-primary" id="btn-done-receipt">
+                    <span>Done</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ADD/EDIT PRODUCT MODAL -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 16px; font-weight: 700;" id="product-modal-title">Add New Product</h3>
+                <span style="cursor: pointer; color: var(--text-muted);" id="btn-close-product"><i data-lucide="x"></i></span>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="product-edit-index" value="">
+                    
+                    <div class="form-group">
+                        <label for="prod-name">Product Title</label>
+                        <input type="text" id="prod-name" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required placeholder="e.g. Maggi Instant Noodles 70g">
+                    </div>
+
+                    <div class="form-group-grid">
+                        <div class="form-group">
+                            <label for="prod-category">Category</label>
+                            <select id="prod-category" class="custom-select" style="margin-top: 4px;" required>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Beverages">Beverages</option>
+                                <option value="Dairy">Dairy</option>
+                                <option value="Snacks & Sweets">Snacks & Sweets</option>
+                                <option value="Spices & Oils">Spices & Oils</option>
+                                <option value="Household">Household</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-stock">Stock Quantity</label>
+                            <input type="number" id="prod-stock" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required min="0" placeholder="e.g. 50">
+                        </div>
+                    </div>
+
+                    <div class="form-group-grid">
+                        <div class="form-group">
+                            <label for="prod-purchase-price">Purchase Cost (₹)</label>
+                            <input type="number" id="prod-purchase-price" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required min="0" step="0.01" placeholder="Cost price">
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-selling-price">Selling Price (₹)</label>
+                            <input type="number" id="prod-selling-price" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required min="0" step="0.01" placeholder="Selling price">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prod-min-alert">Low Stock Threshold Limit</label>
+                        <input type="number" id="prod-min-alert" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required min="1" placeholder="e.g. 10">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-cancel-product">Cancel</button>
+                <button class="btn-primary" id="btn-save-product">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SETTLE UDHAARI DUES -->
+    <div class="modal-overlay" id="settle-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 16px; font-weight: 700;">Record Udhaari Payment</h3>
+                <span style="cursor: pointer; color: var(--text-muted);" id="btn-close-settle"><i data-lucide="x"></i></span>
+            </div>
+            <div class="modal-body">
+                <div class="cart-summary-section" style="margin-bottom: 16px; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.15);">
+                    <h4 style="font-size: 14px; color: var(--accent-emerald); font-weight: 700;" id="settle-customer-name">Customer</h4>
+                    <p style="font-size: 12px; margin-top: 6px; color: var(--text-secondary);">Total Outstanding Dues: <strong><span id="settle-total-due" style="color: var(--accent-rose);">₹0.00</span></strong></p>
+                </div>
+                <div class="form-group">
+                    <label for="settle-amount">Amount Received (₹)</label>
+                    <input type="number" id="settle-amount" class="custom-input" style="padding-left: 12px; margin-top: 4px;" required min="1" step="0.01" placeholder="Enter cash or online received">
+                </div>
+                <div class="form-group">
+                    <label for="settle-mode">Payment Method</label>
+                    <select id="settle-mode" class="custom-select" style="margin-top: 4px;">
+                        <option value="Cash">Cash</option>
+                        <option value="Online (UPI/GPay)">Online (UPI/GPay)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btn-cancel-settle">Cancel</button>
+                <button class="btn-primary" id="btn-save-settle" style="background: linear-gradient(135deg, var(--accent-emerald), #059669); border-color: var(--accent-emerald);">Record Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- core JavaScript orchestration logic -->
+    <script src="app.js"></script>
+</body>
+</html>
